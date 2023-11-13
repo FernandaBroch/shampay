@@ -29,7 +29,6 @@ public class ImportFromExcel {
         Boolean startTableValues = false;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ENGLISH);
 
-        int i = 0;
         for (Row row : sheet) {
             Payment payment = new Payment();
             for (Cell cell : row) {
@@ -57,7 +56,6 @@ public class ImportFromExcel {
                 }
                 startTableValues = isStartOfExtractValues(cell, startTableValues);
             }
-            i++;
             if (payment.getAmount() != null) {
                 payment.setPaymentMethod(PaymentMethod.ITAU);
                 payment.setBudgetType(BudgetType.REALIZED);
@@ -67,7 +65,7 @@ public class ImportFromExcel {
         System.out.println(paymentList);
         return paymentList;
     }
-    public boolean isStartOfExtractValues(Cell cell, Boolean startTableValues){
+    public Boolean isStartOfExtractValues(Cell cell, Boolean startTableValues){
         if (cell.getCellType() == CellType.STRING && !startTableValues) {
             if (cell.getRichStringCellValue().getString().equals("lançamentos"))
                 return true;

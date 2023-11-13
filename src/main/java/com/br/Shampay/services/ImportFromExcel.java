@@ -1,14 +1,19 @@
 package com.br.Shampay.services;
 
+import com.br.Shampay.entities.BudgetType;
+import com.br.Shampay.entities.Payment;
+import com.br.Shampay.entities.PaymentMethod;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
+
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 public class ImportFromExcel {
     public Workbook importFiletoBuffer() throws IOException {
@@ -16,40 +21,57 @@ public class ImportFromExcel {
         FileInputStream file = new FileInputStream(filePath);
         //OPCPackage file = OPCPackage.open(new File(filePath));
         return new HSSFWorkbook(file);
-
     }
 
-    public Map convertExcelFile() throws IOException, InvalidFormatException {
+    public List<Payment> convertExcelFile() throws IOException, InvalidFormatException {
         Sheet sheet = importFiletoBuffer().getSheetAt(0);
+        List<Payment> paymentList = new ArrayList<>();
+        Boolean startTableValues = false;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ENGLISH);
 
-        Map<Integer, List<String>> data = new HashMap<>();
         int i = 0;
-        for (
-                Row row : sheet) {
-            data.put(i, new ArrayList<>());
+        for (Row row : sheet) {
+            Payment payment = new Payment();
             for (Cell cell : row) {
-                switch (cell.getCellType()) {
-                    case STRING:
-                        data.get(i).add(cell.getRichStringCellValue().getString());
-                        break;
-                    case NUMERIC:
-                        if (DateUtil.isCellDateFormatted(cell)) {
-                            data.get(i).add(cell.getDateCellValue() + "");
-                        } else {
-                            data.get(i).add(cell.getNumericCellValue() + "");
-                        }
-                        break;
-                    case BOOLEAN: data.get(i).add(cell.getBooleanCellValue() + "");
-                        break;
-                    case FORMULA: data.get(i).add(cell.getCellFormula() + "");
-                        break;
-                    default:
-                        data.get(i).add(" ");
+                if (startTableValues) {
+                    switch (cell.getCellType()) {
+                        case STRING:
+                            if (cell.getColumnIndex() == 0 & payment.getDate() == null)
+                                payment.setDate(LocalDate.parse(cell.getRichStringCellValue().getString(), formatter));
+                            if (cell.getColumnIndex() == 1)
+                                payment.setImportedDescription(cell.getRichStringCellValue().getString());
+                            break;
+                        case NUMERIC:
+                            if (DateUtil.isCellDateFormatted(cell)) {
+                                if (cell.getColumnIndex() == 0 & payment.getDate() == null) {
+                                    payment.setDate(cell.getDateCellValue().toInstant()
+                                            .atZone(ZoneId.systemDefault())
+                                            .toLocalDate());
+                                }
+                            } else {
+                                if (cell.getColumnIndex() == 3)
+                                    payment.setAmount(BigDecimal.valueOf(cell.getNumericCellValue()));
+                            }
+                            break;
+                    }
                 }
+                startTableValues = isStartOfExtractValues(cell, startTableValues);
             }
             i++;
+            if (payment.getAmount() != null) {
+                payment.setPaymentMethod(PaymentMethod.ITAU);
+                payment.setBudgetType(BudgetType.REALIZED);
+                paymentList.add(payment);
+            }
         }
-        System.out.println(data);
-        return data;
+        System.out.println(paymentList);
+        return paymentList;
+    }
+    public boolean isStartOfExtractValues(Cell cell, Boolean startTableValues){
+        if (cell.getCellType() == CellType.STRING && !startTableValues) {
+            if (cell.getRichStringCellValue().getString().equals(new String("lançamentos")))
+                return true;
+        }
+        return startTableValues;
     }
 }

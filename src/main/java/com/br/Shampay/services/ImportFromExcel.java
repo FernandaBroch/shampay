@@ -69,7 +69,7 @@ public class ImportFromExcel {
     }
     public boolean isStartOfExtractValues(Cell cell, Boolean startTableValues){
         if (cell.getCellType() == CellType.STRING && !startTableValues) {
-            if (cell.getRichStringCellValue().getString().equals(new String("lançamentos")))
+            if (cell.getRichStringCellValue().getString().equals("lançamentos"))
                 return true;
         }
         return startTableValues;

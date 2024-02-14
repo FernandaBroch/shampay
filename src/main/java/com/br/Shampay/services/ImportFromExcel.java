@@ -6,6 +6,9 @@ import com.br.Shampay.entities.PaymentMethod;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Service;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -14,8 +17,11 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-
+@Service
 public class ImportFromExcel {
+    @Autowired
+    PaymentService paymentService;
+
     public Workbook importFiletoBuffer() throws IOException {
         String filePath = "src/main/resources/importFiles/Extrato Conta Corrente-012023.xls";
         FileInputStream file = new FileInputStream(filePath);
@@ -60,6 +66,7 @@ public class ImportFromExcel {
                 payment.setPaymentMethod(PaymentMethod.ITAU);
                 payment.setBudgetType(BudgetType.REALIZED);
                 paymentList.add(payment);
+                paymentService.create(payment);
             }
         }
         System.out.println(paymentList);

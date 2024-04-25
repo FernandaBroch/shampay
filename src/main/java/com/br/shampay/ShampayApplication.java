@@ -1,4 +1,4 @@
-package com.br.Shampay;
+package com.br.shampay;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

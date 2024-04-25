@@ -1,4 +1,4 @@
-package com.br.Shampay;
+package com.br.shampay;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

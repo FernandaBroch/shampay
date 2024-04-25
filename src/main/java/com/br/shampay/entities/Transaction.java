@@ -1,4 +1,4 @@
-package com.br.Shampay.entities;
+package com.br.shampay.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Builder
 @NoArgsConstructor
@@ -15,11 +15,11 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Table(name = "payments")
-public class Payment {
+public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    private LocalDateTime date;
+    private LocalDate date;
     private String importedDescription;
     private String manualDescription;
     private BigDecimal amount;

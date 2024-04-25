@@ -1,4 +1,4 @@
-package com.br.Shampay.entities;
+package com.br.shampay.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @Data
 @Entity
 @Table(name = "payments")
-public class Payment {
+public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

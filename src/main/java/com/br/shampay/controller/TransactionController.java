@@ -15,8 +15,9 @@ import java.io.IOException;
 import java.util.*;
 
 @RestController
-@RequestMapping("payments")
+@RequestMapping("transaction")
 public class TransactionController {
+    private static final String PATH_NAME = "src/main/resources/importFiles/";
     @Autowired
     TransactionService transactionService;
     @Autowired
@@ -25,7 +26,7 @@ public class TransactionController {
     @PostMapping
     @ApiResponse(responseCode = "201" )
     public ResponseEntity<Void> create(@RequestBody String fileName, PaymentMethod paymentMethod) throws IOException, InvalidFormatException {
-        transactionService.saveTransactions(excelToTransactionConverter.convertExcelFileToTransactionLineList(fileName, paymentMethod));
+        transactionService.saveTransactions(excelToTransactionConverter.convertExcelFileToTransactionLineList(PATH_NAME, fileName, paymentMethod));
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

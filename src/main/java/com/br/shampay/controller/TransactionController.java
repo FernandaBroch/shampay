@@ -26,9 +26,9 @@ public class TransactionController {
     @Autowired
     ExcelToTransactionConverter excelToTransactionConverter;
 
-    @PostMapping
+    @PostMapping("/import")
     @ApiResponse(responseCode = "201" )
-    public ResponseEntity<Void> create(@RequestBody String fileName, PaymentMethod paymentMethod) throws IOException, InvalidFormatException {
+    public ResponseEntity<Void> importExtract(@RequestBody String fileName, PaymentMethod paymentMethod) throws IOException, InvalidFormatException {
         if(paymentMethod == PaymentMethod.ITAU) {
             transactionService.saveTransactions(excelToTransactionConverter.convertExcelFileToTransactionLineList(PATH_NAME, fileName, paymentMethod));
         }
@@ -36,6 +36,20 @@ public class TransactionController {
             transactionService.saveTransactions(csvToTransactionConverter.convertCsvFileToTransactionLineList(PATH_NAME, fileName));
         }
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+    @PostMapping
+    @ApiResponse(responseCode = "201" )
+    public ResponseEntity<Void> create(@RequestBody Transaction transaction ) throws IOException, InvalidFormatException {
+        transactionService.save(transaction);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+    @PutMapping("/{id}" )
+    @ApiResponse(responseCode = "200")
+    public ResponseEntity<Long> updateTransaction(@PathVariable(name ="id") Long id, @RequestBody Transaction updatedTransaction ){
+        Transaction existingTransaction = transactionService.findById(id);
+        updateTransactionNonNullProperties(existingTransaction, updatedTransaction);
+        Transaction transactionUpdated = transactionService.save(existingTransaction);
+        return ResponseEntity.status(HttpStatus.OK).body(transactionUpdated.getId());
     }
 
     @GetMapping
@@ -46,6 +60,21 @@ public class TransactionController {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
         return ResponseEntity.ok(transactionListList);
+    }
+
+    private void updateTransactionNonNullProperties(Transaction existingTransaction, Transaction updatedTransaction) {
+
+        for (java.lang.reflect.Field field : Transaction.class.getDeclaredFields()) {
+            field.setAccessible(true);
+            try {
+                Object updatedValue = field.get(updatedTransaction);
+                if (updatedValue != null) {
+                    field.set(existingTransaction, updatedValue);
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }

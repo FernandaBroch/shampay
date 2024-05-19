@@ -22,6 +22,11 @@ public class TransactionService {
                 .stream().toList();
     }
 
+    public Transaction findById(Long id){
+        return transactionRepository.findById(id).get();
+
+    }
+
     public void saveTransactions(List<TransactionLine> transactionLineList){
         for (TransactionLine transactionLine:transactionLineList ) {
             save(transactionLine.toTransaction());

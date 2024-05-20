@@ -21,8 +21,10 @@ public class ItauTransactionLineGenerator implements TransactionLineGenerator{
 
     public Boolean isStartOfExtractValues(Row row){
         Cell cell = row.getCell(4);
-        if (cell.getCellType() == CellType.STRING) {
-            return cell.getRichStringCellValue().getString().equals("saldos (R$)");
+        if(cell != null) {
+            if (cell.getCellType() == CellType.STRING) {
+                return cell.getRichStringCellValue().getString().equals("saldos (R$)");
+            }
         }
         return false;
     }

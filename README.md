@@ -17,7 +17,7 @@ or
 `Gradle application bootRun`
 
 ### API URL:
-http://localhost:3000/
+http://localhost:8080/
 
 ### Swagger UI URL
 http://localhost:3000/swagger-ui/index.html

@@ -27,4 +27,5 @@ public class Transaction {
     private Category category;
     private BudgetType budgetType;
     private PaymentMethod paymentMethod;
+    private Long payerUserId;
 }

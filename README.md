@@ -21,3 +21,6 @@ http://localhost:3000/
 
 ### Swagger UI URL
 http://localhost:3000/swagger-ui/index.html
+
+### Local DB console
+http://localhost:3000/h2-console/

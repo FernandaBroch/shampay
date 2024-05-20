@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
-@RequestMapping("transaction")
+@RequestMapping("transactions")
 public class TransactionController {
     private static final String PATH_NAME = "src/main/resources/importFiles/";
     @Autowired

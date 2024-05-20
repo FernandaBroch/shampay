@@ -58,6 +58,7 @@ public class ItauTransactionLineGenerator implements TransactionLineGenerator{
         if (transactionLine.getAmount() != null) {
             transactionLine.setPaymentMethod(PaymentMethod.ITAU);
             transactionLine.setBudgetType(BudgetType.REALIZED);
+            transactionLine.setShared(false);
             return transactionLine;
         }
         return null;

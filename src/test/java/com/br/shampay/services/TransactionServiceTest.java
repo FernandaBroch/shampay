@@ -18,9 +18,9 @@ import java.util.Locale;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
-class PaymentMethodServiceTest {
+class TransactionServiceTest {
     @Autowired
-    PaymentMethodService paymentMethodService;
+    TransactionService transactionService;
 
     @Test
     void givenListOfTransactionWhenPaymentMethodIsNubankCalculateTotalBalance() {
@@ -29,13 +29,11 @@ class PaymentMethodServiceTest {
 
         TransactionLine transactionLine1 = new TransactionLine(LocalDate.parse("01/01/2024", formatter), "Pagamento de fatura", null, new BigDecimal("-2.90"), null, null, BudgetType.REALIZED, PaymentMethod.NUBANK);
         TransactionLine transactionLine2 = new TransactionLine(LocalDate.parse("12/01/2024", formatter), "Transferencia Recebida Fulano de tal 999.999.999-99 - NU PAGAMENTOS  Agencia: 9 Conta: 9999999-1", null, new BigDecimal("100.00"), null, null, BudgetType.REALIZED, PaymentMethod.NUBANK);
-        TransactionLine transactionLine3 = new TransactionLine(LocalDate.parse("12/01/2024", formatter), "Transferencia Recebida Fulano de tal 999.999.999-99 - NU PAGAMENTOS  Agencia: 9 Conta: 9999999-1", null, new BigDecimal("300.00"), null, null, BudgetType.REALIZED, PaymentMethod.ITAU);
 
         transactionList.add(transactionLine1.toTransaction());
         transactionList.add(transactionLine2.toTransaction());
-        transactionList.add(transactionLine3.toTransaction());
 
-        BigDecimal actualTransactionListTotal = paymentMethodService.calculateTotalBalanceByPaymentMethod(transactionList, PaymentMethod.NUBANK);
+        BigDecimal actualTransactionListTotal = transactionService.calculateTotalBalance(transactionList);
         BigDecimal expectedTransactionListTotal = transactionLine1.getAmount().add(transactionLine2.getAmount());
 
         assertThat(expectedTransactionListTotal).isEqualTo(actualTransactionListTotal);

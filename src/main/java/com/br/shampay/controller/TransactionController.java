@@ -1,5 +1,6 @@
 package com.br.shampay.controller;
 
+import com.br.shampay.entities.BudgetType;
 import com.br.shampay.entities.PaymentMethod;
 import com.br.shampay.entities.Transaction;
 import com.br.shampay.services.CsvToTransactionConverter;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -61,9 +63,21 @@ public class TransactionController {
         }
         return ResponseEntity.ok(transactionListList);
     }
+    @GetMapping("/balance")
+    @ApiResponse(responseCode = "200")
+    public ResponseEntity<BigDecimal> getTransactionsBalanceByPaymentMethodAndBudgetType(PaymentMethod paymentMethod, BudgetType budgetType) {
+        List<Transaction> transactionListList = transactionService.findByBudgetTypeAndPaymentMethod(budgetType, paymentMethod);
+        BigDecimal transactionBalance = transactionService.calculateTotalBalance(transactionListList);
+        return ResponseEntity.ok(transactionBalance);
+    }
+    @GetMapping("/shared")
+    @ApiResponse(responseCode = "200")
+    public ResponseEntity<List<Transaction>> getSharedTransactions(Boolean shared) {
+        List<Transaction> transactionListList = transactionService.findSharedTransaction(shared);
+        return ResponseEntity.ok(transactionListList);
+    }
 
     private void updateTransactionNonNullProperties(Transaction existingTransaction, Transaction updatedTransaction) {
-
         for (java.lang.reflect.Field field : Transaction.class.getDeclaredFields()) {
             field.setAccessible(true);
             try {
@@ -76,5 +90,4 @@ public class TransactionController {
             }
         }
     }
-
 }

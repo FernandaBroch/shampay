@@ -14,19 +14,20 @@ public class CsvToTransactionConverter {
     @Autowired
     NubankTransactionLineGenerator nubankTransactionLineGenerator;
 
-    public List<TransactionLine> convertCsvFileToTransactionLineList(String pathName, String fileName) {
+    public List<TransactionLine> convertCsvFileToTransactionLineList(String pathName, String fileName, Long payerUserId) {
 
         List<TransactionLine> transactionLineList = new ArrayList<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(pathName + fileName))) {
             String csvLine = br.readLine();
             while ((csvLine = br.readLine()) != null) {
-                transactionLineList.add(nubankTransactionLineGenerator.transactionLineGenerator(csvLine));
+                TransactionLine transactionLine = nubankTransactionLineGenerator.transactionLineGenerator(csvLine);
+                transactionLine.setPayerUserId(payerUserId);
+                transactionLineList.add(transactionLine);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         return transactionLineList;
     }
-
 }

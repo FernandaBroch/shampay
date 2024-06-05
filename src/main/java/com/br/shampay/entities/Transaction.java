@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Builder
 @NoArgsConstructor
@@ -22,10 +23,16 @@ public class Transaction {
     private LocalDate date;
     private String importedDescription;
     private String manualDescription;
-    private BigDecimal amount;
+    private BigDecimal totalAmount;
     private Boolean shared;
     private Category category;
     private BudgetType budgetType;
     private PaymentMethod paymentMethod;
     private Long payerUserId;
+
+    private Long originalTransactionId;
+    private List<Long> sharedUsersId;
+    private Double sharedPercentage;
+    private BigDecimal paidAmount;
+    private BigDecimal dueAmount;
 }

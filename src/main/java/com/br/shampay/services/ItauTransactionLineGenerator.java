@@ -49,13 +49,13 @@ public class ItauTransactionLineGenerator implements TransactionLineGenerator{
                         }
                     } else {
                         if (cell.getColumnIndex() == columnNameOfIndex.get("Amount"))
-                            transactionLine.setAmount(BigDecimal.valueOf(cell.getNumericCellValue()));
+                            transactionLine.setTotalAmount(BigDecimal.valueOf(cell.getNumericCellValue()));
                     }
                 }
             }
         }
 
-        if (transactionLine.getAmount() != null) {
+        if (transactionLine.getTotalAmount() != null) {
             transactionLine.setPaymentMethod(PaymentMethod.ITAU);
             transactionLine.setBudgetType(BudgetType.REALIZED);
             transactionLine.setShared(false);

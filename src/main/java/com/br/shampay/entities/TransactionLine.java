@@ -15,22 +15,24 @@ public class TransactionLine {
     private LocalDate date;
     private String importedDescription;
     private String manualDescription;
-    private BigDecimal amount;
+    private BigDecimal totalAmount;
     private Boolean shared;
     private Category category;
     private BudgetType budgetType;
     private PaymentMethod paymentMethod;
+    private Long payerUserId;
 
     public Transaction toTransaction(){
         return Transaction.builder()
                 .date(date)
                 .importedDescription(importedDescription)
                 .manualDescription(manualDescription)
-                .amount(amount)
+                .totalAmount(totalAmount)
                 .shared(shared)
                 .category(category)
                 .budgetType(budgetType)
                 .paymentMethod(paymentMethod)
+                .payerUserId(payerUserId)
                 .build();
     }
 }

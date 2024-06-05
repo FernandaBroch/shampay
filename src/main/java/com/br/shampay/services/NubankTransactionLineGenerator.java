@@ -33,12 +33,12 @@ public class NubankTransactionLineGenerator{
                 validValues[i] = values[i];
             }
             transactionLine.setDate(LocalDate.parse(validValues[0], formatter));
-            transactionLine.setAmount(new BigDecimal(validValues[1]));
+            transactionLine.setTotalAmount(new BigDecimal(validValues[1]));
             transactionLine.setImportedDescription(validValues[3]);
         }
         else {
             transactionLine.setDate(LocalDate.parse(values[0], formatter));
-            transactionLine.setAmount(new BigDecimal(values[1]));
+            transactionLine.setTotalAmount(new BigDecimal(values[1]));
             transactionLine.setImportedDescription(values[3]);
         }
         transactionLine.setPaymentMethod(PaymentMethod.NUBANK);

@@ -25,7 +25,7 @@ public class ExcelToTransactionConverter {
         return new HSSFWorkbook(fileInputStream);
     }
 
-    public List<TransactionLine> convertExcelFileToTransactionLineList(String pathName, String fileName, PaymentMethod paymentMethod) throws IOException, InvalidFormatException {
+    public List<TransactionLine> convertExcelFileToTransactionLineList(String pathName, String fileName, PaymentMethod paymentMethod, Long payerUserId) throws IOException, InvalidFormatException {
         Sheet sheet = importFiletoBuffer(pathName, fileName).getSheetAt(0);
         List<TransactionLine> transactionLineList = new ArrayList<>();
         Boolean startTableValues = false;
@@ -33,12 +33,17 @@ public class ExcelToTransactionConverter {
 
         for (Row row : sheet) {
             if(startTableValues){
-                transactionLineList.add(transactionLineGenerator.transactionLineGenerator(row));
+                TransactionLine transactionLine = transactionLineGenerator.transactionLineGenerator(row);
+                if(transactionLine != null) {
+                    transactionLine.setPayerUserId(payerUserId);
+                    transactionLineList.add(transactionLine);
+                }
             }
             if(!startTableValues){
                 startTableValues = transactionLineGenerator.isStartOfExtractValues(row);
             }
         }
+
         return transactionLineList.stream().filter(Objects::nonNull).toList();
     }
 }

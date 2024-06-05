@@ -45,8 +45,7 @@ public class TransactionService {
     }
     public BigDecimal calculateTotalBalance(List<Transaction> transactions){
         return transactions.stream()
-                .map(Transaction::getAmount)
+                .map(Transaction::getTotalAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
-
 }

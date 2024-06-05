@@ -27,14 +27,14 @@ class TransactionServiceTest {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ENGLISH);
         List<Transaction> transactionList = new ArrayList<>();
 
-        TransactionLine transactionLine1 = new TransactionLine(LocalDate.parse("01/01/2024", formatter), "Pagamento de fatura", null, new BigDecimal("-2.90"), null, null, BudgetType.REALIZED, PaymentMethod.NUBANK);
-        TransactionLine transactionLine2 = new TransactionLine(LocalDate.parse("12/01/2024", formatter), "Transferencia Recebida Fulano de tal 999.999.999-99 - NU PAGAMENTOS  Agencia: 9 Conta: 9999999-1", null, new BigDecimal("100.00"), null, null, BudgetType.REALIZED, PaymentMethod.NUBANK);
+        TransactionLine transactionLine1 = new TransactionLine(LocalDate.parse("01/01/2024", formatter), "Pagamento de fatura", null, new BigDecimal("-2.90"), null, null, BudgetType.REALIZED, PaymentMethod.NUBANK, 1L);
+        TransactionLine transactionLine2 = new TransactionLine(LocalDate.parse("12/01/2024", formatter), "Transferencia Recebida Fulano de tal 999.999.999-99 - NU PAGAMENTOS  Agencia: 9 Conta: 9999999-1", null, new BigDecimal("100.00"), null, null, BudgetType.REALIZED, PaymentMethod.NUBANK, 1L);
 
         transactionList.add(transactionLine1.toTransaction());
         transactionList.add(transactionLine2.toTransaction());
 
         BigDecimal actualTransactionListTotal = transactionService.calculateTotalBalance(transactionList);
-        BigDecimal expectedTransactionListTotal = transactionLine1.getAmount().add(transactionLine2.getAmount());
+        BigDecimal expectedTransactionListTotal = transactionLine1.getTotalAmount().add(transactionLine2.getTotalAmount());
 
         assertThat(expectedTransactionListTotal).isEqualTo(actualTransactionListTotal);
     }

@@ -43,7 +43,6 @@ public class NubankTransactionLineGenerator{
         }
         transactionLine.setPaymentMethod(PaymentMethod.NUBANK);
         transactionLine.setBudgetType(BudgetType.REALIZED);
-        transactionLine.setShared(false);
         return transactionLine;
     }
 }

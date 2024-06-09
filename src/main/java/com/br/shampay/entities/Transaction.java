@@ -24,7 +24,6 @@ public class Transaction {
     private String importedDescription;
     private String manualDescription;
     private BigDecimal totalAmount;
-    private Boolean shared;
     private Category category;
     private BudgetType budgetType;
     private PaymentMethod paymentMethod;
@@ -32,7 +31,7 @@ public class Transaction {
     private String originalFileName;
 
     private Long originalTransactionId;
-    private List<Long> sharedUsersId;
+    private List<Long> sharedTransactions;
     private Double sharedPercentage;
     private BigDecimal paidAmount;
     private BigDecimal dueAmount;

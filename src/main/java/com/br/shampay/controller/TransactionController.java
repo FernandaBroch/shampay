@@ -1,5 +1,6 @@
 package com.br.shampay.controller;
 
+import com.br.shampay.dto.TransactionShared;
 import com.br.shampay.entities.BudgetType;
 import com.br.shampay.entities.PaymentMethod;
 import com.br.shampay.entities.Transaction;
@@ -53,6 +54,15 @@ public class TransactionController {
         Transaction transactionUpdated = transactionService.save(existingTransaction);
         return ResponseEntity.status(HttpStatus.OK).body(transactionUpdated.getId());
     }
+    @PutMapping("shared/{id}" )
+    @ApiResponse(responseCode = "200")
+    public ResponseEntity<Long> createSharedTransaction(@RequestBody TransactionShared transactionSharedData){
+        Transaction existingTransaction = transactionService.findById(transactionSharedData.getOriginalTransactionId());
+        Transaction transactionShared = transactionService.buildTransactionShared(existingTransaction, transactionSharedData);
+        Transaction transactionSharedCreated = transactionService.save(transactionShared);
+        transactionService.updateSharedFieldsOfOriginalTransaction(existingTransaction, transactionSharedCreated);
+        return ResponseEntity.status(HttpStatus.OK).body(transactionSharedCreated.getId());
+    }
 
     @GetMapping
     @ApiResponse(responseCode = "200")
@@ -72,8 +82,8 @@ public class TransactionController {
     }
     @GetMapping("/shared")
     @ApiResponse(responseCode = "200")
-    public ResponseEntity<List<Transaction>> getSharedTransactions(Boolean shared) {
-        List<Transaction> transactionListList = transactionService.findSharedTransaction(shared);
+    public ResponseEntity<List<Transaction>> getSharedTransactions() {
+        List<Transaction> transactionListList = transactionService.findSharedTransaction();
         return ResponseEntity.ok(transactionListList);
     }
 

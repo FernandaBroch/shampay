@@ -1,5 +1,6 @@
 package com.br.shampay.services;
 
+import com.br.shampay.dto.TransactionShared;
 import com.br.shampay.entities.BudgetType;
 import com.br.shampay.entities.PaymentMethod;
 import com.br.shampay.entities.Transaction;
@@ -21,14 +22,14 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 class TransactionServiceTest {
     @Autowired
     TransactionService transactionService;
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ENGLISH);
+    TransactionLine transactionLine1 = new TransactionLine(LocalDate.parse("01/01/2024", formatter), "Pagamento de fatura", null, new BigDecimal("-2.90"), null, BudgetType.REALIZED, PaymentMethod.NUBANK, 1L, "EXTRATO1");
+    TransactionLine transactionLine2 = new TransactionLine(LocalDate.parse("12/01/2024", formatter), "Transferencia Recebida Fulano de tal 999.999.999-99 - NU PAGAMENTOS  Agencia: 9 Conta: 9999999-1", null, new BigDecimal("100.00"), null, BudgetType.REALIZED, PaymentMethod.NUBANK, 1L, "EXTRATO1");
 
     @Test
     void givenListOfTransactionWhenPaymentMethodIsNubankCalculateTotalBalance() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ENGLISH);
-        List<Transaction> transactionList = new ArrayList<>();
 
-        TransactionLine transactionLine1 = new TransactionLine(LocalDate.parse("01/01/2024", formatter), "Pagamento de fatura", null, new BigDecimal("-2.90"), null, null, BudgetType.REALIZED, PaymentMethod.NUBANK, 1L);
-        TransactionLine transactionLine2 = new TransactionLine(LocalDate.parse("12/01/2024", formatter), "Transferencia Recebida Fulano de tal 999.999.999-99 - NU PAGAMENTOS  Agencia: 9 Conta: 9999999-1", null, new BigDecimal("100.00"), null, null, BudgetType.REALIZED, PaymentMethod.NUBANK, 1L);
+        List<Transaction> transactionList = new ArrayList<>();
 
         transactionList.add(transactionLine1.toTransaction());
         transactionList.add(transactionLine2.toTransaction());
@@ -38,4 +39,81 @@ class TransactionServiceTest {
 
         assertThat(expectedTransactionListTotal).isEqualTo(actualTransactionListTotal);
     }
+
+    @Test
+    void givenTransactionSharedDataWithDefaultSharedCriteriaBuildNewTransaction() {
+        TransactionShared transactionShared = new TransactionShared();
+        transactionShared.setOriginalTransactionId(1L);
+        transactionShared.setSharedUserId(2L);
+
+        Transaction expectedTransaction = getExpectedTransaction();
+        expectedTransaction.setSharedPercentage(0.5);
+        expectedTransaction.setDueAmount(new BigDecimal("50.00"));
+
+        Transaction transaction1 = transactionLine1.toTransaction();
+        transaction1.setTotalAmount(new BigDecimal("100.0"));
+        transaction1.setId(1L);
+
+        Transaction actualTransaction = transactionService.buildTransactionShared(transaction1, transactionShared );
+        actualTransaction.setId(3L);
+
+        assertThat(actualTransaction).isEqualTo(expectedTransaction);
+
+    }
+    @Test
+    void givenTransactionSharedDataWithSharedPercentCriteriaBuildNewTransaction() {
+        TransactionShared transactionShared = new TransactionShared();
+        transactionShared.setOriginalTransactionId(1L);
+        transactionShared.setSharedUserId(2L);
+        transactionShared.setSharedPercentage(0.3);
+
+        Transaction expectedTransaction = getExpectedTransaction();
+        expectedTransaction.setSharedPercentage(0.3);
+        expectedTransaction.setDueAmount(new BigDecimal("30.00"));
+
+        Transaction transaction1 = transactionLine1.toTransaction();
+        transaction1.setTotalAmount(new BigDecimal("100.0"));
+        transaction1.setId(1L);
+
+        Transaction actualTransaction = transactionService.buildTransactionShared(transaction1, transactionShared );
+        actualTransaction.setId(3L);
+
+        assertThat(actualTransaction).isEqualTo(expectedTransaction);
+
+    }
+    @Test
+    void givenTransactionSharedDataWithSharedAmountCriteriaBuildNewTransaction() {
+        TransactionShared transactionShared = new TransactionShared();
+        transactionShared.setOriginalTransactionId(1L);
+        transactionShared.setSharedUserId(2L);
+        transactionShared.setDueAmount(new BigDecimal("10.00"));
+
+        Transaction expectedTransaction = getExpectedTransaction();
+        expectedTransaction.setSharedPercentage(0.1);
+        expectedTransaction.setDueAmount(new BigDecimal("10.00"));
+
+        Transaction transaction1 = transactionLine1.toTransaction();
+        transaction1.setTotalAmount(new BigDecimal("100.0"));
+        transaction1.setId(1L);
+
+        Transaction actualTransaction = transactionService.buildTransactionShared(transaction1, transactionShared );
+        actualTransaction.setId(3L);
+
+        assertThat(actualTransaction).isEqualTo(expectedTransaction);
+
+    }
+
+    private Transaction getExpectedTransaction() {
+        Transaction expectedTransaction = new Transaction();
+        expectedTransaction.setId(3L);
+        expectedTransaction.setDate(LocalDate.parse("01/01/2024", formatter));
+        expectedTransaction.setImportedDescription("Pagamento de fatura");
+        expectedTransaction.setBudgetType(BudgetType.REALIZED);
+        expectedTransaction.setPaymentMethod(PaymentMethod.NUBANK);
+        expectedTransaction.setOriginalTransactionId(1L);
+        expectedTransaction.setPayerUserId(2L);
+
+        return expectedTransaction;
+    }
+
 }

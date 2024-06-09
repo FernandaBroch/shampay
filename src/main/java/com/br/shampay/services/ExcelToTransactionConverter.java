@@ -36,6 +36,7 @@ public class ExcelToTransactionConverter {
                 TransactionLine transactionLine = transactionLineGenerator.transactionLineGenerator(row);
                 if(transactionLine != null) {
                     transactionLine.setPayerUserId(payerUserId);
+                    transactionLine.setOriginalFileName(fileName);
                     transactionLineList.add(transactionLine);
                 }
             }

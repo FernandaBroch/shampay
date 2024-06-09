@@ -16,11 +16,11 @@ public class TransactionLine {
     private String importedDescription;
     private String manualDescription;
     private BigDecimal totalAmount;
-    private Boolean shared;
     private Category category;
     private BudgetType budgetType;
     private PaymentMethod paymentMethod;
     private Long payerUserId;
+    private String originalFileName;
 
     public Transaction toTransaction(){
         return Transaction.builder()
@@ -28,11 +28,11 @@ public class TransactionLine {
                 .importedDescription(importedDescription)
                 .manualDescription(manualDescription)
                 .totalAmount(totalAmount)
-                .shared(shared)
                 .category(category)
                 .budgetType(budgetType)
                 .paymentMethod(paymentMethod)
                 .payerUserId(payerUserId)
+                .originalFileName(originalFileName)
                 .build();
     }
 }

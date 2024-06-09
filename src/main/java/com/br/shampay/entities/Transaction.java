@@ -29,6 +29,7 @@ public class Transaction {
     private BudgetType budgetType;
     private PaymentMethod paymentMethod;
     private Long payerUserId;
+    private String originalFileName;
 
     private Long originalTransactionId;
     private List<Long> sharedUsersId;

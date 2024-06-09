@@ -25,8 +25,8 @@ public class ExcelToTransactionConverterTest {
     public void givenItauExtracCreateItauTransactions() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ENGLISH);
         List<TransactionLine> actualTransactionLineList;
-        TransactionLine transactionLine1 = new TransactionLine(LocalDate.parse("11/12/2023", formatter), "PIX TRANSF ", null, new BigDecimal("100.0"), false, null, BudgetType.REALIZED, PaymentMethod.ITAU, 1L);
-        TransactionLine transactionLine2 = new TransactionLine(LocalDate.parse("18/12/2023", formatter), "REND PAGO APLIC AUT MAIS", null, new BigDecimal("0.71"), false, null, BudgetType.REALIZED, PaymentMethod.ITAU, 1L);
+        TransactionLine transactionLine1 = new TransactionLine(LocalDate.parse("11/12/2023", formatter), "PIX TRANSF ", null, new BigDecimal("100.0"), null, BudgetType.REALIZED, PaymentMethod.ITAU, 1L, "TestItauExtrato.xls");
+        TransactionLine transactionLine2 = new TransactionLine(LocalDate.parse("18/12/2023", formatter), "REND PAGO APLIC AUT MAIS", null, new BigDecimal("0.71"), null, BudgetType.REALIZED, PaymentMethod.ITAU, 1L, "TestItauExtrato.xls");
 
         List<TransactionLine> expectedTransactionLineList = new ArrayList<>();
         expectedTransactionLineList.add(transactionLine1);

@@ -23,6 +23,7 @@ public class CsvToTransactionConverter {
             while ((csvLine = br.readLine()) != null) {
                 TransactionLine transactionLine = nubankTransactionLineGenerator.transactionLineGenerator(csvLine);
                 transactionLine.setPayerUserId(payerUserId);
+                transactionLine.setOriginalFileName(fileName);
                 transactionLineList.add(transactionLine);
             }
         } catch (IOException e) {

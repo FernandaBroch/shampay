@@ -1,5 +1,6 @@
 package com.br.shampay.services;
 
+import com.br.shampay.entities.PaymentMethod;
 import com.br.shampay.entities.TransactionLine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,16 +13,17 @@ import java.util.List;
 public class CsvToTransactionConverter {
 
     @Autowired
-    NubankTransactionLineGenerator nubankTransactionLineGenerator;
+    CsvTransactionLineFactory csvTransactionLineFactory;
 
-    public List<TransactionLine> convertCsvFileToTransactionLineList(String pathName, String fileName, Long payerUserId) {
+    public List<TransactionLine> convertCsvFileToTransactionLineList(String pathName, String fileName, PaymentMethod paymentMethod, Long payerUserId) {
 
         List<TransactionLine> transactionLineList = new ArrayList<>();
+        CsvTransactionLineGenerator csvTransactionLineGenerator = csvTransactionLineFactory.create(paymentMethod);
 
         try (BufferedReader br = new BufferedReader(new FileReader(pathName + fileName))) {
             String csvLine = br.readLine();
             while ((csvLine = br.readLine()) != null) {
-                TransactionLine transactionLine = nubankTransactionLineGenerator.transactionLineGenerator(csvLine);
+                TransactionLine transactionLine = csvTransactionLineGenerator.transactionLineGenerator(csvLine);
                 transactionLine.setPayerUserId(payerUserId);
                 transactionLine.setOriginalFileName(fileName);
                 transactionLineList.add(transactionLine);

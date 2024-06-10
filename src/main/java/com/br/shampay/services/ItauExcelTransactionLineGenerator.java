@@ -15,7 +15,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Map;
 
-public class ItauTransactionLineGenerator implements TransactionLineGenerator{
+public class ItauExcelTransactionLineGenerator implements ExcelTransactionLineGenerator {
 
     Map<String,Integer> columnNameOfIndex = Map.of("Date",0, "StatementDescription", 1, "Amount", 3);
 

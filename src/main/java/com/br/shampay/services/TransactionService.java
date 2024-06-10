@@ -6,7 +6,7 @@ import com.br.shampay.entities.PaymentMethod;
 import com.br.shampay.entities.Transaction;
 import com.br.shampay.entities.TransactionLine;
 import com.br.shampay.repositories.TransactionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -15,10 +15,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class TransactionService {
     public static final Double DEFAULT_SHARED_PERCENTAGE = 0.5;
-    @Autowired
+
     TransactionRepository transactionRepository;
+
+    UserService userService;
 
     public Transaction save(Transaction transaction){
         transactionRepository.save(transaction);
@@ -52,9 +55,9 @@ public class TransactionService {
                 .map(Transaction::getTotalAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
-    public Transaction buildTransactionShared(Transaction transaction, TransactionShared transactionSharedData){
+    public Transaction createTransactionShared(Transaction transaction, TransactionShared transactionSharedData){
         Transaction transactionShared = new Transaction();
-        if(transactionSharedData.getSharedUserId() != null){
+        if(userService.findUserById(transactionSharedData.getSharedUserId()).isPresent()){
             transactionShared.setDate(transaction.getDate());
             transactionShared.setImportedDescription(transaction.getImportedDescription());
             transactionShared.setManualDescription(transaction.getManualDescription());
@@ -73,18 +76,20 @@ public class TransactionService {
         return transactionRepository.findByOriginalFileName(fileName);
     }
     public Transaction updateSharedFieldsOfOriginalTransaction(Transaction transaction, Transaction transactionShared){
-        transaction.setPaidAmount(transaction.getTotalAmount().subtract(transactionShared.getDueAmount()));
-        transaction.setSharedPercentage(1 - transactionShared.getSharedPercentage());
-        transaction.setOriginalTransactionId(transaction.getId());
-        transaction.setSharedTransactions(addTransactionSharedToTransactionSharedList(transaction, transactionShared.getId()));
-        this.save(transaction);
+        if(transactionShared.getDueAmount() != null) {
+            transaction.setPaidAmount(transaction.getTotalAmount().subtract(transactionShared.getDueAmount()));
+            transaction.setSharedPercentage(1 - transactionShared.getSharedPercentage());
+            transaction.setOriginalTransactionId(transaction.getId());
+            transaction.setSharedTransactions(addTransactionSharedToTransactionSharedList(transaction, transactionShared.getId()));
+            this.save(transaction);
+        }
         return transaction;
     }
     private BigDecimal calculateSharedAmount(Transaction transaction, TransactionShared transactionShared) {
         BigDecimal sharedAmount = null;
         switch (findTransactionSharedCriteria(transactionShared)){
             case "PERCENTAGE":
-                sharedAmount = transaction.getTotalAmount().multiply(BigDecimal.valueOf(transactionShared.getSharedPercentage()));
+                sharedAmount = transaction.getTotalAmount().multiply(BigDecimal.valueOf(transactionShared.getDuePercentage()));
                 break;
             case "AMOUNT":
                 sharedAmount = transactionShared.getDueAmount();
@@ -98,7 +103,7 @@ public class TransactionService {
         Double sharedPercentage = null;
         switch (findTransactionSharedCriteria(transactionShared)){
             case "PERCENTAGE":
-                sharedPercentage = transactionShared.getSharedPercentage();
+                sharedPercentage = transactionShared.getDuePercentage();
                 break;
             case "AMOUNT":
                 sharedPercentage = transactionShared.getDueAmount().divide(transaction.getTotalAmount(), 4, RoundingMode.HALF_UP).doubleValue();
@@ -110,10 +115,9 @@ public class TransactionService {
     }
     private String findTransactionSharedCriteria(TransactionShared transaction){
         String transactionSharedCriteria = "DEFAULT";
-        if (transaction.getSharedPercentage() != null && transaction.getSharedPercentage() > 0) {
+        if (transaction.getDuePercentage() != null && transaction.getDuePercentage() > 0) {
             transactionSharedCriteria = "PERCENTAGE";
-        }
-        if(transaction.getDueAmount() != null && transaction.getDueAmount().compareTo(BigDecimal.ZERO) > 0){
+        } else if(transaction.getDueAmount() != null && transaction.getDueAmount().compareTo(BigDecimal.ZERO) > 0){
             transactionSharedCriteria = "AMOUNT";
         }
         return transactionSharedCriteria;

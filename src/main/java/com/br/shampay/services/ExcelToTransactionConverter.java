@@ -29,11 +29,11 @@ public class ExcelToTransactionConverter {
         Sheet sheet = importFiletoBuffer(pathName, fileName).getSheetAt(0);
         List<TransactionLine> transactionLineList = new ArrayList<>();
         Boolean startTableValues = false;
-        TransactionLineGenerator transactionLineGenerator = transactionLineFactory.create(paymentMethod);
+        ExcelTransactionLineGenerator excelTransactionLineGenerator = transactionLineFactory.create(paymentMethod);
 
         for (Row row : sheet) {
             if(startTableValues){
-                TransactionLine transactionLine = transactionLineGenerator.transactionLineGenerator(row);
+                TransactionLine transactionLine = excelTransactionLineGenerator.transactionLineGenerator(row);
                 if(transactionLine != null) {
                     transactionLine.setPayerUserId(payerUserId);
                     transactionLine.setOriginalFileName(fileName);
@@ -41,7 +41,7 @@ public class ExcelToTransactionConverter {
                 }
             }
             if(!startTableValues){
-                startTableValues = transactionLineGenerator.isStartOfExtractValues(row);
+                startTableValues = excelTransactionLineGenerator.isStartOfExtractValues(row);
             }
         }
 

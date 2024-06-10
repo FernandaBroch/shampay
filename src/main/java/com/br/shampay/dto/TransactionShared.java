@@ -11,6 +11,6 @@ import java.math.BigDecimal;
 public class TransactionShared {
     private Long originalTransactionId;
     private Long sharedUserId;
-    private Double sharedPercentage;
+    private Double duePercentage;
     private BigDecimal dueAmount;
 }

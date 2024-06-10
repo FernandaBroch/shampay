@@ -5,9 +5,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class TransactionLineFactory {
-    public TransactionLineGenerator create(PaymentMethod paymentMethod){
+    public ExcelTransactionLineGenerator create(PaymentMethod paymentMethod){
         if(paymentMethod.equals(PaymentMethod.ITAU)){
-            return new ItauTransactionLineGenerator();
+            return new ItauExcelTransactionLineGenerator();
         }
         return null;
     }

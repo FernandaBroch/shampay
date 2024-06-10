@@ -33,7 +33,7 @@ class CsvToTransactionConverterTest {
         expectedTransactionLineList.add(transactionLine1);
         expectedTransactionLineList.add(transactionLine2);
 
-        actualTransactionLineList = csvToTransactionConverter.convertCsvFileToTransactionLineList("src/test/resources/", "TestNubankExtrato.csv", 1L);
+        actualTransactionLineList = csvToTransactionConverter.convertCsvFileToTransactionLineList("src/test/resources/", "TestNubankExtrato.csv", PaymentMethod.NUBANK, 1L);
 
         assertThat(expectedTransactionLineList).isEqualTo(actualTransactionLineList);
 

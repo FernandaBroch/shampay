@@ -36,8 +36,8 @@ public class TransactionController {
             if (paymentMethod == PaymentMethod.ITAU) {
                 transactionService.saveTransactions(excelToTransactionConverter.convertExcelFileToTransactionLineList(PATH_NAME, fileName, paymentMethod, payerUserId));
             }
-            if (paymentMethod == PaymentMethod.NUBANK) {
-                transactionService.saveTransactions(csvToTransactionConverter.convertCsvFileToTransactionLineList(PATH_NAME, fileName, payerUserId));
+            if (paymentMethod == PaymentMethod.NUBANK || paymentMethod == paymentMethod.CARD_NUBANK_MASTERCARD) {
+                transactionService.saveTransactions(csvToTransactionConverter.convertCsvFileToTransactionLineList(PATH_NAME, fileName, paymentMethod, payerUserId));
             }
             return ResponseEntity.status(HttpStatus.CREATED).build();
         }
@@ -61,8 +61,8 @@ public class TransactionController {
     @ApiResponse(responseCode = "200")
     public ResponseEntity<Long> createSharedTransaction(@RequestBody TransactionShared transactionSharedData){
         Transaction existingTransaction = transactionService.findById(transactionSharedData.getOriginalTransactionId());
-        Transaction transactionShared = transactionService.buildTransactionShared(existingTransaction, transactionSharedData);
-        Transaction transactionSharedCreated = transactionService.save(transactionShared);
+        Transaction transactionShared = transactionService.createTransactionShared(existingTransaction, transactionSharedData);
+        Transaction transactionSharedCreated = transactionService.findById(transactionShared.getId());
         transactionService.updateSharedFieldsOfOriginalTransaction(existingTransaction, transactionSharedCreated);
         return ResponseEntity.status(HttpStatus.OK).body(transactionSharedCreated.getId());
     }

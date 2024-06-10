@@ -1,13 +1,12 @@
 package com.br.shampay.services;
 
 import com.br.shampay.dto.TransactionShared;
-import com.br.shampay.entities.BudgetType;
-import com.br.shampay.entities.PaymentMethod;
-import com.br.shampay.entities.Transaction;
-import com.br.shampay.entities.TransactionLine;
+import com.br.shampay.entities.*;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -17,15 +16,23 @@ import java.util.List;
 import java.util.Locale;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
 @SpringBootTest
+@ActiveProfiles("test" )
 class TransactionServiceTest {
     @Autowired
     TransactionService transactionService;
+    @Autowired
+    UserService userService;
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ENGLISH);
     TransactionLine transactionLine1 = new TransactionLine(LocalDate.parse("01/01/2024", formatter), "Pagamento de fatura", null, new BigDecimal("-2.90"), null, BudgetType.REALIZED, PaymentMethod.NUBANK, 1L, "EXTRATO1");
     TransactionLine transactionLine2 = new TransactionLine(LocalDate.parse("12/01/2024", formatter), "Transferencia Recebida Fulano de tal 999.999.999-99 - NU PAGAMENTOS  Agencia: 9 Conta: 9999999-1", null, new BigDecimal("100.00"), null, BudgetType.REALIZED, PaymentMethod.NUBANK, 1L, "EXTRATO1");
-
+    @BeforeEach
+    public void setup(){
+        User user = new User(1L, "fulane");
+        User user2 = new User(2L, "beltrane");
+        userService.save(user);
+        userService.save(user2);
+    }
     @Test
     void givenListOfTransactionWhenPaymentMethodIsNubankCalculateTotalBalance() {
 
@@ -54,7 +61,7 @@ class TransactionServiceTest {
         transaction1.setTotalAmount(new BigDecimal("100.0"));
         transaction1.setId(1L);
 
-        Transaction actualTransaction = transactionService.buildTransactionShared(transaction1, transactionShared );
+        Transaction actualTransaction = transactionService.createTransactionShared(transaction1, transactionShared );
         actualTransaction.setId(3L);
 
         assertThat(actualTransaction).isEqualTo(expectedTransaction);
@@ -65,7 +72,7 @@ class TransactionServiceTest {
         TransactionShared transactionShared = new TransactionShared();
         transactionShared.setOriginalTransactionId(1L);
         transactionShared.setSharedUserId(2L);
-        transactionShared.setSharedPercentage(0.3);
+        transactionShared.setDuePercentage(0.3);
 
         Transaction expectedTransaction = getExpectedTransaction();
         expectedTransaction.setSharedPercentage(0.3);
@@ -75,7 +82,7 @@ class TransactionServiceTest {
         transaction1.setTotalAmount(new BigDecimal("100.0"));
         transaction1.setId(1L);
 
-        Transaction actualTransaction = transactionService.buildTransactionShared(transaction1, transactionShared );
+        Transaction actualTransaction = transactionService.createTransactionShared(transaction1, transactionShared );
         actualTransaction.setId(3L);
 
         assertThat(actualTransaction).isEqualTo(expectedTransaction);
@@ -96,7 +103,7 @@ class TransactionServiceTest {
         transaction1.setTotalAmount(new BigDecimal("100.0"));
         transaction1.setId(1L);
 
-        Transaction actualTransaction = transactionService.buildTransactionShared(transaction1, transactionShared );
+        Transaction actualTransaction = transactionService.createTransactionShared(transaction1, transactionShared );
         actualTransaction.setId(3L);
 
         assertThat(actualTransaction).isEqualTo(expectedTransaction);

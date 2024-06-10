@@ -69,6 +69,9 @@ public class TransactionService {
         }
         return transactionShared;
     }
+    public List<Transaction> findTransactionsByOriginalFileName(String fileName){
+        return transactionRepository.findByOriginalFileName(fileName);
+    }
     public Transaction updateSharedFieldsOfOriginalTransaction(Transaction transaction, Transaction transactionShared){
         transaction.setPaidAmount(transaction.getTotalAmount().subtract(transactionShared.getDueAmount()));
         transaction.setSharedPercentage(1 - transactionShared.getSharedPercentage());

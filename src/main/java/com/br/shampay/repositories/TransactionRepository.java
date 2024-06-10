@@ -10,4 +10,5 @@ import java.util.List;
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
     List<Transaction> findByOriginalTransactionIdIsNotNull();
     List<Transaction> findByBudgetTypeAndPaymentMethod(BudgetType budgetType, PaymentMethod paymentMethod);
+    List<Transaction> findByOriginalFileName(String originalFileName);
 }

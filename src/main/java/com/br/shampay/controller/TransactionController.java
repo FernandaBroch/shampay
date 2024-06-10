@@ -32,13 +32,16 @@ public class TransactionController {
     @PostMapping("/import")
     @ApiResponse(responseCode = "201" )
     public ResponseEntity<Void> importExtract(@RequestBody String fileName, PaymentMethod paymentMethod, Long payerUserId) throws IOException, InvalidFormatException {
-        if(paymentMethod == PaymentMethod.ITAU) {
-            transactionService.saveTransactions(excelToTransactionConverter.convertExcelFileToTransactionLineList(PATH_NAME, fileName, paymentMethod, payerUserId) );
+        if(transactionService.findTransactionsByOriginalFileName(fileName).size() == 0) {
+            if (paymentMethod == PaymentMethod.ITAU) {
+                transactionService.saveTransactions(excelToTransactionConverter.convertExcelFileToTransactionLineList(PATH_NAME, fileName, paymentMethod, payerUserId));
+            }
+            if (paymentMethod == PaymentMethod.NUBANK) {
+                transactionService.saveTransactions(csvToTransactionConverter.convertCsvFileToTransactionLineList(PATH_NAME, fileName, payerUserId));
+            }
+            return ResponseEntity.status(HttpStatus.CREATED).build();
         }
-        if(paymentMethod == PaymentMethod.NUBANK){
-            transactionService.saveTransactions(csvToTransactionConverter.convertCsvFileToTransactionLineList(PATH_NAME, fileName, payerUserId));
-        }
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
     @PostMapping
     @ApiResponse(responseCode = "201" )

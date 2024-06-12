@@ -27,8 +27,8 @@ class CsvToTransactionConverterTest {
         List<TransactionLine> actualTransactionLineList;
         List<TransactionLine> expectedTransactionLineList = new ArrayList<>();
 
-        TransactionLine transactionLine1 = new TransactionLine(LocalDate.parse("01/01/2024", formatter), "Pagamento de fatura", null, new BigDecimal("-2.90"),  null, BudgetType.REALIZED, PaymentMethod.NUBANK, 1L, "TestNubankExtrato.csv");
-        TransactionLine transactionLine2 = new TransactionLine(LocalDate.parse("12/01/2024", formatter), "Transferencia Recebida Fulano de tal 999.999.999-99 - NU PAGAMENTOS  Agencia: 9 Conta: 9999999-1", null, new BigDecimal("100.00"), null, BudgetType.REALIZED, PaymentMethod.NUBANK, 1L, "TestNubankExtrato.csv");
+        TransactionLine transactionLine1 = new TransactionLine(LocalDate.parse("01/01/2024", formatter), "Pagamento de fatura", new BigDecimal("-2.90"),  null, BudgetType.REALIZED, PaymentMethod.NUBANK, 1L, "TestNubankExtrato.csv");
+        TransactionLine transactionLine2 = new TransactionLine(LocalDate.parse("12/01/2024", formatter), "Transferencia Recebida Fulano de tal 999.999.999-99 - NU PAGAMENTOS  Agencia: 9 Conta: 9999999-1", new BigDecimal("100.00"), null, BudgetType.REALIZED, PaymentMethod.NUBANK, 1L, "TestNubankExtrato.csv");
 
         expectedTransactionLineList.add(transactionLine1);
         expectedTransactionLineList.add(transactionLine2);

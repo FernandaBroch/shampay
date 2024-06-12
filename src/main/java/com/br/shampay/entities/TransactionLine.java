@@ -14,7 +14,6 @@ import java.time.LocalDate;
 public class TransactionLine {
     private LocalDate date;
     private String importedDescription;
-    private String manualDescription;
     private BigDecimal totalAmount;
     private Category category;
     private BudgetType budgetType;
@@ -26,7 +25,6 @@ public class TransactionLine {
         return Transaction.builder()
                 .date(date)
                 .importedDescription(importedDescription)
-                .manualDescription(manualDescription)
                 .totalAmount(totalAmount)
                 .category(category)
                 .budgetType(budgetType)

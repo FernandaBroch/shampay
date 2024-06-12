@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
     List<Transaction> findByOriginalTransactionIdIsNotNull();
-    List<Transaction> findByBudgetTypeAndPaymentMethod(BudgetType budgetType, PaymentMethod paymentMethod);
+    List<Transaction> findByBudgetTypeAndPaymentMethodAndPayerUserId(BudgetType budgetType, PaymentMethod paymentMethod, Long payerUserId);
     List<Transaction> findByOriginalFileName(String originalFileName);
 }

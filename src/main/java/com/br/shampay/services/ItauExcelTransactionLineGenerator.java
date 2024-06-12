@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Locale;
 import java.util.Map;
 
@@ -35,8 +36,13 @@ public class ItauExcelTransactionLineGenerator implements ExcelTransactionLineGe
         for (Cell cell : row) {
             switch (cell.getCellType()) {
                 case STRING -> {
-                    if (cell.getColumnIndex() == columnNameOfIndex.get("Date") & transactionLine.getDate() == null)
-                        transactionLine.setDate(LocalDate.parse(cell.getRichStringCellValue().getString(), formatter));
+                    if (cell.getColumnIndex() == columnNameOfIndex.get("Date") & transactionLine.getDate() == null){
+                        try{
+                            transactionLine.setDate(LocalDate.parse(cell.getRichStringCellValue().getString(), formatter));
+                        }catch (DateTimeParseException ex){
+                            System.out.println("Nao achou data");
+                        }
+                    }
                     if (cell.getColumnIndex() == columnNameOfIndex.get("StatementDescription"))
                         transactionLine.setImportedDescription(cell.getRichStringCellValue().getString());
                 }
@@ -55,7 +61,7 @@ public class ItauExcelTransactionLineGenerator implements ExcelTransactionLineGe
             }
         }
 
-        if (transactionLine.getTotalAmount() != null) {
+        if (transactionLine.getDate() != null && transactionLine.getTotalAmount() != null) {
             transactionLine.setPaymentMethod(PaymentMethod.ITAU);
             transactionLine.setBudgetType(BudgetType.REALIZED);
             return transactionLine;

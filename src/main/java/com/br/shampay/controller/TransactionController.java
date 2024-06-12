@@ -1,9 +1,7 @@
 package com.br.shampay.controller;
 
 import com.br.shampay.dto.TransactionShared;
-import com.br.shampay.entities.BudgetType;
-import com.br.shampay.entities.PaymentMethod;
-import com.br.shampay.entities.Transaction;
+import com.br.shampay.entities.*;
 import com.br.shampay.services.CsvToTransactionConverter;
 import com.br.shampay.services.ExcelToTransactionConverter;
 import com.br.shampay.services.TransactionService;
@@ -17,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("transactions")
@@ -33,10 +32,10 @@ public class TransactionController {
     @ApiResponse(responseCode = "201" )
     public ResponseEntity<Void> importExtract(@RequestBody String fileName, PaymentMethod paymentMethod, Long payerUserId) throws IOException, InvalidFormatException {
         if(transactionService.findTransactionsByOriginalFileName(fileName).size() == 0) {
-            if (paymentMethod == PaymentMethod.ITAU) {
+            if (paymentMethod == PaymentMethod.ITAU || paymentMethod == PaymentMethod.ITAU_CARD_LATAM || paymentMethod == PaymentMethod.ITAU_CARD_MASTERCARD || paymentMethod == PaymentMethod.ITAU_CARD_VISA) {
                 transactionService.saveTransactions(excelToTransactionConverter.convertExcelFileToTransactionLineList(PATH_NAME, fileName, paymentMethod, payerUserId));
             }
-            if (paymentMethod == PaymentMethod.NUBANK || paymentMethod == paymentMethod.CARD_NUBANK_MASTERCARD) {
+            if (paymentMethod == PaymentMethod.NUBANK || paymentMethod == paymentMethod.NUBANK_CARD_MASTERCARD) {
                 transactionService.saveTransactions(csvToTransactionConverter.convertCsvFileToTransactionLineList(PATH_NAME, fileName, paymentMethod, payerUserId));
             }
             return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -57,7 +56,7 @@ public class TransactionController {
         Transaction transactionUpdated = transactionService.save(existingTransaction);
         return ResponseEntity.status(HttpStatus.OK).body(transactionUpdated.getId());
     }
-    @PutMapping("shared/{id}" )
+    @PutMapping("/shared/{id}" )
     @ApiResponse(responseCode = "200")
     public ResponseEntity<Long> createSharedTransaction(@RequestBody TransactionShared transactionSharedData){
         Transaction existingTransaction = transactionService.findById(transactionSharedData.getOriginalTransactionId());
@@ -78,16 +77,48 @@ public class TransactionController {
     }
     @GetMapping("/balance")
     @ApiResponse(responseCode = "200")
-    public ResponseEntity<BigDecimal> getTransactionsBalanceByPaymentMethodAndBudgetType(PaymentMethod paymentMethod, BudgetType budgetType) {
-        List<Transaction> transactionListList = transactionService.findByBudgetTypeAndPaymentMethod(budgetType, paymentMethod);
+    public ResponseEntity<BigDecimal> getTransactionsBalanceByPaymentMethodAndBudgetType(PaymentMethod paymentMethod, BudgetType budgetType, Long userId) {
+        List<Transaction> transactionListList = transactionService.findByBudgetTypeAndPaymentMethod(budgetType, paymentMethod, userId);
         BigDecimal transactionBalance = transactionService.calculateTotalBalance(transactionListList);
         return ResponseEntity.ok(transactionBalance);
+    }
+    @GetMapping("/balanceByStatementFile")
+    @ApiResponse(responseCode = "200")
+    public ResponseEntity<BigDecimal> getTransactionsBalanceByPaymentMethodAndBudgetTypeAndStatementFile(PaymentMethod paymentMethod, Long userId, String statementFileName) {
+        List<Transaction> transactionListList = transactionService.findByBudgetTypeAndPaymentMethod(BudgetType.REALIZED, paymentMethod, userId);
+        BigDecimal transactionBalance = transactionService.calculateTotalBalance(transactionListList.stream().filter(transaction -> transaction.getOriginalFileName().equals(statementFileName)).toList());
+        return ResponseEntity.ok(transactionBalance);
+    }
+
+    @GetMapping("/dueAmountByUser")
+    @ApiResponse(responseCode = "200")
+    public ResponseEntity<Map<String, BigDecimal>> getDueAmountByUser() {
+        return ResponseEntity.ok(transactionService.displayDueAmountByUser());
     }
     @GetMapping("/shared")
     @ApiResponse(responseCode = "200")
     public ResponseEntity<List<Transaction>> getSharedTransactions() {
         List<Transaction> transactionListList = transactionService.findSharedTransaction();
         return ResponseEntity.ok(transactionListList);
+    }
+    @PostMapping("/clearing")
+    @ApiResponse(responseCode = "201" )
+    public ResponseEntity<Long> clearingDueAmount(@RequestBody TransactionLine transaction, Long dueUserId ) throws IOException, InvalidFormatException {
+        transaction.setCategory(Category.TRANSFERENCE);
+        transaction.setBudgetType(BudgetType.REALIZED);
+        transaction.setOriginalFileName("MANUAL");
+        Transaction createdTransaction = transactionService.save(transaction.toTransaction());
+
+        TransactionShared transactionSharedData = new TransactionShared();
+        transactionSharedData.setOriginalTransactionId(createdTransaction.getId());
+        transactionSharedData.setDuePercentage(1.0);
+        transactionSharedData.setSharedUserId(dueUserId);
+
+        Transaction existingTransaction = transactionService.findById(transactionSharedData.getOriginalTransactionId());
+        Transaction transactionShared = transactionService.createTransactionShared(existingTransaction, transactionSharedData);
+        Transaction transactionSharedCreated = transactionService.findById(transactionShared.getId());
+        transactionService.updateSharedFieldsOfOriginalTransaction(existingTransaction, transactionSharedCreated);
+        return ResponseEntity.status(HttpStatus.CREATED).body(transactionSharedCreated.getId());
     }
 
     private void updateTransactionNonNullProperties(Transaction existingTransaction, Transaction updatedTransaction) {

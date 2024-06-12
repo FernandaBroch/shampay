@@ -40,7 +40,7 @@ public class NubankCardTransactionLineGenerator implements CsvTransactionLineGen
             transactionLine.setTotalAmount(new BigDecimal(values[columnNameOfIndex.get("Amount")]).multiply(BigDecimal.valueOf(-1)));
             transactionLine.setImportedDescription(values[columnNameOfIndex.get("Title")]);
         }
-        transactionLine.setPaymentMethod(PaymentMethod.CARD_NUBANK_MASTERCARD);
+        transactionLine.setPaymentMethod(PaymentMethod.NUBANK_CARD_MASTERCARD);
         transactionLine.setBudgetType(BudgetType.REALIZED);
         return transactionLine;
     }

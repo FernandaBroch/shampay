@@ -1,18 +1,14 @@
 package com.br.shampay.services;
 
 import com.br.shampay.dto.TransactionShared;
-import com.br.shampay.entities.BudgetType;
-import com.br.shampay.entities.PaymentMethod;
-import com.br.shampay.entities.Transaction;
-import com.br.shampay.entities.TransactionLine;
+import com.br.shampay.entities.*;
 import com.br.shampay.repositories.TransactionRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -31,8 +27,8 @@ public class TransactionService {
         return transactionRepository.findAll()
                 .stream().toList();
     }
-    public List<Transaction> findByBudgetTypeAndPaymentMethod(BudgetType budgetType, PaymentMethod paymentMethod){
-        return transactionRepository.findByBudgetTypeAndPaymentMethod(budgetType, paymentMethod)
+    public List<Transaction> findByBudgetTypeAndPaymentMethod(BudgetType budgetType, PaymentMethod paymentMethod, Long payerUserId){
+        return transactionRepository.findByBudgetTypeAndPaymentMethodAndPayerUserId(budgetType, paymentMethod, payerUserId)
                 .stream().toList();
     }
     public List<Transaction> findSharedTransaction(){
@@ -53,7 +49,9 @@ public class TransactionService {
     public BigDecimal calculateTotalBalance(List<Transaction> transactions){
         return transactions.stream()
                 .map(Transaction::getTotalAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .filter(Objects::nonNull)
+                .reduce((prev, next) -> prev.add(next))
+                .orElse(BigDecimal.ZERO);
     }
     public Transaction createTransactionShared(Transaction transaction, TransactionShared transactionSharedData){
         Transaction transactionShared = new Transaction();
@@ -63,7 +61,6 @@ public class TransactionService {
             transactionShared.setManualDescription(transaction.getManualDescription());
             transactionShared.setCategory(transaction.getCategory());
             transactionShared.setBudgetType(transaction.getBudgetType());
-            transactionShared.setPaymentMethod(transaction.getPaymentMethod());
             transactionShared.setOriginalTransactionId(transaction.getId());
             transactionShared.setPayerUserId(transactionSharedData.getSharedUserId());
             transactionShared.setSharedPercentage(calculateSharedPercentage(transaction, transactionSharedData));
@@ -84,6 +81,30 @@ public class TransactionService {
             this.save(transaction);
         }
         return transaction;
+    }
+    public Map<String, BigDecimal> displayDueAmountByUser(){
+        Map<String,BigDecimal> map = new HashMap<>();
+        List<User> users = userService.findAll();
+        for (User user:users) {
+            map.put(user.getName(), calculateDueAmountByUser(user.getId()));
+        }
+        Optional<Map.Entry<String, BigDecimal>> biggestDebit = map.entrySet()
+                .stream()
+                .max(Map.Entry.comparingByValue());
+
+        map.put("Pay to " + biggestDebit.get().getKey(), map.values()
+                .stream()
+                .reduce((prev, next) -> prev.subtract(next))
+                .orElse(BigDecimal.ZERO));
+        return map;
+    }
+    public BigDecimal calculateDueAmountByUser(Long userId){
+        List<Transaction> transactions = findAll();
+        return transactions.stream()
+                .filter(transaction -> transaction.getPayerUserId().equals(userId))
+                .filter(transaction -> transaction.getDueAmount() != null)
+                .map(Transaction::getDueAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
     private BigDecimal calculateSharedAmount(Transaction transaction, TransactionShared transactionShared) {
         BigDecimal sharedAmount = null;

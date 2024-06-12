@@ -16,7 +16,7 @@ import java.util.*;
 public class ExcelToTransactionConverter {
 
     @Autowired
-    TransactionLineFactory transactionLineFactory;
+    ExcelTransactionLineFactory excelTransactionLineFactory;
 
     public Workbook importFiletoBuffer(String pathName, String fileName) throws IOException {
         File fileInDirectory = new File(pathName + fileName);
@@ -29,7 +29,7 @@ public class ExcelToTransactionConverter {
         Sheet sheet = importFiletoBuffer(pathName, fileName).getSheetAt(0);
         List<TransactionLine> transactionLineList = new ArrayList<>();
         Boolean startTableValues = false;
-        ExcelTransactionLineGenerator excelTransactionLineGenerator = transactionLineFactory.create(paymentMethod);
+        ExcelTransactionLineGenerator excelTransactionLineGenerator = excelTransactionLineFactory.create(paymentMethod);
 
         for (Row row : sheet) {
             if(startTableValues){

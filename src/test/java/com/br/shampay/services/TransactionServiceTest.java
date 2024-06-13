@@ -116,7 +116,7 @@ class TransactionServiceTest {
         expectedTransaction.setDate(LocalDate.parse("01/01/2024", formatter));
         expectedTransaction.setImportedDescription("Pagamento de fatura");
         expectedTransaction.setBudgetType(BudgetType.REALIZED);
-        expectedTransaction.setPaymentMethod(PaymentMethod.NUBANK);
+        expectedTransaction.setPaymentMethod(null);
         expectedTransaction.setOriginalTransactionId(1L);
         expectedTransaction.setPayerUserId(2L);
 

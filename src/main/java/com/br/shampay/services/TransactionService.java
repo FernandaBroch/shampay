@@ -106,6 +106,25 @@ public class TransactionService {
                 .map(Transaction::getDueAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
+    public Transaction createClearingTransaction(TransactionLine transaction, Long dueUserId) {
+        transaction.setCategory(Category.TRANSFERENCE);
+        transaction.setBudgetType(BudgetType.REALIZED);
+        transaction.setOriginalFileName("MANUAL");
+        Transaction createdTransaction = this.save(transaction.toTransaction());
+
+        TransactionShared transactionSharedData = new TransactionShared();
+        transactionSharedData.setOriginalTransactionId(createdTransaction.getId());
+        transactionSharedData.setDuePercentage(1.0);
+        transactionSharedData.setSharedUserId(dueUserId);
+
+        Transaction existingTransaction = this.findById(transactionSharedData.getOriginalTransactionId());
+        Transaction transactionShared = this.createTransactionShared(existingTransaction, transactionSharedData);
+        Transaction transactionSharedCreated = this.findById(transactionShared.getId());
+        this.updateSharedFieldsOfOriginalTransaction(existingTransaction, transactionSharedCreated);
+
+        return transactionSharedCreated;
+    }
+
     private BigDecimal calculateSharedAmount(Transaction transaction, TransactionShared transactionShared) {
         BigDecimal sharedAmount = null;
         switch (findTransactionSharedCriteria(transactionShared)){

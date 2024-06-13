@@ -104,20 +104,7 @@ public class TransactionController {
     @PostMapping("/clearing")
     @ApiResponse(responseCode = "201" )
     public ResponseEntity<Long> clearingDueAmount(@RequestBody TransactionLine transaction, Long dueUserId ) throws IOException, InvalidFormatException {
-        transaction.setCategory(Category.TRANSFERENCE);
-        transaction.setBudgetType(BudgetType.REALIZED);
-        transaction.setOriginalFileName("MANUAL");
-        Transaction createdTransaction = transactionService.save(transaction.toTransaction());
-
-        TransactionShared transactionSharedData = new TransactionShared();
-        transactionSharedData.setOriginalTransactionId(createdTransaction.getId());
-        transactionSharedData.setDuePercentage(1.0);
-        transactionSharedData.setSharedUserId(dueUserId);
-
-        Transaction existingTransaction = transactionService.findById(transactionSharedData.getOriginalTransactionId());
-        Transaction transactionShared = transactionService.createTransactionShared(existingTransaction, transactionSharedData);
-        Transaction transactionSharedCreated = transactionService.findById(transactionShared.getId());
-        transactionService.updateSharedFieldsOfOriginalTransaction(existingTransaction, transactionSharedCreated);
+        Transaction transactionSharedCreated = transactionService.createClearingTransaction(transaction, dueUserId);
         return ResponseEntity.status(HttpStatus.CREATED).body(transactionSharedCreated.getId());
     }
 

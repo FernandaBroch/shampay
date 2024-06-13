@@ -35,7 +35,7 @@ public class TransactionController {
             if (paymentMethod == PaymentMethod.ITAU || paymentMethod == PaymentMethod.ITAU_CARD_LATAM || paymentMethod == PaymentMethod.ITAU_CARD_MASTERCARD || paymentMethod == PaymentMethod.ITAU_CARD_VISA) {
                 transactionService.saveTransactions(excelToTransactionConverter.convertExcelFileToTransactionLineList(PATH_NAME, fileName, paymentMethod, payerUserId));
             }
-            if (paymentMethod == PaymentMethod.NUBANK || paymentMethod == paymentMethod.NUBANK_CARD_MASTERCARD) {
+            if (paymentMethod == PaymentMethod.NUBANK || paymentMethod == PaymentMethod.NUBANK_CARD_MASTERCARD) {
                 transactionService.saveTransactions(csvToTransactionConverter.convertCsvFileToTransactionLineList(PATH_NAME, fileName, paymentMethod, payerUserId));
             }
             return ResponseEntity.status(HttpStatus.CREATED).build();

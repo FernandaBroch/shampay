@@ -23,9 +23,12 @@ public class TransactionService {
         transactionRepository.save(transaction);
         return transaction;
     }
+    public void deleteById(Long id){
+        transactionRepository.deleteById(id);
+    }
     public List<Transaction> findAll(){
         return transactionRepository.findAll()
-                .stream().toList();
+                .stream().sorted(Comparator.comparingLong(Transaction::getId)).toList();
     }
     public List<Transaction> findByBudgetTypeAndPaymentMethod(BudgetType budgetType, PaymentMethod paymentMethod, Long payerUserId){
         return transactionRepository.findByBudgetTypeAndPaymentMethodAndPayerUserId(budgetType, paymentMethod, payerUserId)
@@ -169,5 +172,44 @@ public class TransactionService {
         }
         transactionsShared.add(transactionSharedId);
         return transactionsShared;
+    }
+    public Transaction unsharedTransaction(Transaction transaction){
+        Transaction transactionUnshared = transaction;
+        for (Long sharedTransactionId : transaction.getSharedTransactions()) {
+            this.deleteById(sharedTransactionId);
+        }
+        transactionUnshared.setOriginalTransactionId(null);
+        transactionUnshared.setSharedTransactions(null);
+        transactionUnshared.setSharedPercentage(null);
+        transactionUnshared.setPaidAmount(null);
+        transactionUnshared.setDueAmount(null);
+        return this.updateTransaction(transaction.getId(), transactionUnshared);
+    }
+    public Transaction updateTransaction(Long id, Transaction updatedTransaction){
+        Transaction existingTransaction = this.findById(id);
+        updateTransactionNonNullProperties(existingTransaction, updatedTransaction);
+        Transaction transactionUpdated = this.save(existingTransaction);
+        return transactionUpdated;
+    }
+    public Transaction updateSharedTransaction(TransactionShared transactionSharedData){
+        Transaction existingTransaction = this.findById(transactionSharedData.getOriginalTransactionId());
+        Transaction transactionShared = this.createTransactionShared(existingTransaction, transactionSharedData);
+        Transaction transactionSharedCreated = this.findById(transactionShared.getId());
+        this.updateSharedFieldsOfOriginalTransaction(existingTransaction, transactionSharedCreated);
+        return transactionSharedCreated;
+    }
+
+    private void updateTransactionNonNullProperties(Transaction existingTransaction, Transaction updatedTransaction) {
+        for (java.lang.reflect.Field field : Transaction.class.getDeclaredFields()) {
+            field.setAccessible(true);
+            try {
+                Object updatedValue = field.get(updatedTransaction);
+                if (updatedValue != null) {
+                    field.set(existingTransaction, updatedValue);
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

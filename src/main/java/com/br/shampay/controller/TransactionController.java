@@ -51,19 +51,20 @@ public class TransactionController {
     @PutMapping("/{id}" )
     @ApiResponse(responseCode = "200")
     public ResponseEntity<Long> updateTransaction(@PathVariable(name ="id") Long id, @RequestBody Transaction updatedTransaction ){
-        Transaction existingTransaction = transactionService.findById(id);
-        updateTransactionNonNullProperties(existingTransaction, updatedTransaction);
-        Transaction transactionUpdated = transactionService.save(existingTransaction);
+        Transaction transactionUpdated = transactionService.updateTransaction(id, updatedTransaction);
         return ResponseEntity.status(HttpStatus.OK).body(transactionUpdated.getId());
     }
     @PutMapping("/shared/{id}" )
     @ApiResponse(responseCode = "200")
     public ResponseEntity<Long> createSharedTransaction(@RequestBody TransactionShared transactionSharedData){
-        Transaction existingTransaction = transactionService.findById(transactionSharedData.getOriginalTransactionId());
-        Transaction transactionShared = transactionService.createTransactionShared(existingTransaction, transactionSharedData);
-        Transaction transactionSharedCreated = transactionService.findById(transactionShared.getId());
-        transactionService.updateSharedFieldsOfOriginalTransaction(existingTransaction, transactionSharedCreated);
+        Transaction transactionSharedCreated = transactionService.updateSharedTransaction(transactionSharedData);
         return ResponseEntity.status(HttpStatus.OK).body(transactionSharedCreated.getId());
+    }
+    @PutMapping("/unshared/{id}" )
+    @ApiResponse(responseCode = "200")
+    public ResponseEntity<Long> unshareTransaction(@PathVariable(name ="id") Long id){
+        Transaction transactionUnshared =  transactionService.unsharedTransaction(transactionService.findById(id));
+        return ResponseEntity.status(HttpStatus.OK).body(transactionUnshared.getId());
     }
 
     @GetMapping
@@ -108,17 +109,4 @@ public class TransactionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(transactionSharedCreated.getId());
     }
 
-    private void updateTransactionNonNullProperties(Transaction existingTransaction, Transaction updatedTransaction) {
-        for (java.lang.reflect.Field field : Transaction.class.getDeclaredFields()) {
-            field.setAccessible(true);
-            try {
-                Object updatedValue = field.get(updatedTransaction);
-                if (updatedValue != null) {
-                    field.set(existingTransaction, updatedValue);
-                }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 }

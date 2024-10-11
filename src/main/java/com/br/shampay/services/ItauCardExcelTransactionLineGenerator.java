@@ -81,13 +81,18 @@ public class ItauCardExcelTransactionLineGenerator implements ExcelTransactionLi
             transactionLine.setPaymentMethod(transactionLineDolar.getPaymentMethod());
             transactionLineDolar = new TransactionLine();
             return transactionLine;
-        }else if (transactionLine.getImportedDescription() != null && transactionLine.getImportedDescription().equals("IOF - transação internacional")) {
+        }else if ("IOF - transação internacional".equals(transactionLine.getImportedDescription())) {
             transactionLine.setDate(transactionLineIOF.getDate());
             transactionLine.setBudgetType(transactionLineIOF.getBudgetType());
             transactionLine.setPaymentMethod(transactionLineIOF.getPaymentMethod());
             transactionLineIOF = new TransactionLine();
             return transactionLine;
-        }else if (transactionLine.getDate() != null) {
+        } else if ("SALDO PARCIAL".equals(transactionLine.getImportedDescription()) ||
+                   "SALDO FINAL".equals(transactionLine.getImportedDescription()) ||
+                   "APL APLIC AUT MAIS".equals(transactionLine.getImportedDescription()) ||
+                   "RES APLIC AUT MAIS".equals(transactionLine.getImportedDescription())) {
+            return null;
+        } else if (transactionLine.getDate() != null) {
             transactionLine.setPaymentMethod(this.paymentMethod);
             transactionLine.setBudgetType(BudgetType.REALIZED);
             if (transactionLine.getImportedDescription().equals("dólar de conversão")) {

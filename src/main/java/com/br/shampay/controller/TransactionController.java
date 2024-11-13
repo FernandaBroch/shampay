@@ -1,5 +1,6 @@
 package com.br.shampay.controller;
 
+import com.br.shampay.dto.TransactionCleared;
 import com.br.shampay.dto.TransactionShared;
 import com.br.shampay.entities.*;
 import com.br.shampay.services.CsvToTransactionConverter;
@@ -104,8 +105,8 @@ public class TransactionController {
     }
     @PostMapping("/clearing")
     @ApiResponse(responseCode = "201" )
-    public ResponseEntity<Long> clearingDueAmount(@RequestBody TransactionLine transaction, Long dueUserId ) throws IOException, InvalidFormatException {
-        Transaction transactionSharedCreated = transactionService.createClearingTransaction(transaction, dueUserId);
+    public ResponseEntity<Long> clearingDueAmount(@RequestBody TransactionCleared transaction ) throws IOException, InvalidFormatException {
+        Transaction transactionSharedCreated = transactionService.createClearingTransaction(transaction);
         return ResponseEntity.status(HttpStatus.CREATED).body(transactionSharedCreated.getId());
     }
 

@@ -1,5 +1,6 @@
 package com.br.shampay.services;
 
+import com.br.shampay.dto.TransactionCleared;
 import com.br.shampay.dto.TransactionShared;
 import com.br.shampay.entities.*;
 import com.br.shampay.repositories.TransactionRepository;
@@ -66,6 +67,7 @@ public class TransactionService {
             transactionShared.setBudgetType(transaction.getBudgetType());
             transactionShared.setOriginalTransactionId(transaction.getId());
             transactionShared.setPayerUserId(transactionSharedData.getSharedUserId());
+            transactionShared.setOriginalFileName("Shared "+ transaction.getOriginalFileName());
             transactionShared.setSharedPercentage(calculateSharedPercentage(transaction, transactionSharedData));
             transactionShared.setDueAmount(calculateSharedAmount(transaction, transactionSharedData));
             this.save(transactionShared);
@@ -109,16 +111,21 @@ public class TransactionService {
                 .map(Transaction::getDueAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
-    public Transaction createClearingTransaction(TransactionLine transaction, Long dueUserId) {
-        transaction.setCategory(Category.TRANSFERENCE);
-        transaction.setBudgetType(BudgetType.REALIZED);
-        transaction.setOriginalFileName("MANUAL");
-        Transaction createdTransaction = this.save(transaction.toTransaction());
+    public Transaction createClearingTransaction(TransactionCleared transaction) {
+        Transaction createdTransaction = new Transaction();
+        createdTransaction.setCategory(Category.TRANSFERENCE);
+        createdTransaction.setBudgetType(BudgetType.REALIZED);
+        createdTransaction.setOriginalFileName("MANUAL");
+        createdTransaction.setTotalAmount(transaction.getTotalAmount());
+        createdTransaction.setManualDescription(transaction.getImportedDescription());
+        createdTransaction.setDate(transaction.getDate());
+        createdTransaction.setPayerUserId(0L);
+        createdTransaction = this.save(createdTransaction);
 
         TransactionShared transactionSharedData = new TransactionShared();
         transactionSharedData.setOriginalTransactionId(createdTransaction.getId());
         transactionSharedData.setDuePercentage(1.0);
-        transactionSharedData.setSharedUserId(dueUserId);
+        transactionSharedData.setSharedUserId(transaction.getDueUserId());
 
         Transaction existingTransaction = this.findById(transactionSharedData.getOriginalTransactionId());
         Transaction transactionShared = this.createTransactionShared(existingTransaction, transactionSharedData);
